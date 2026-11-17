@@ -1,0 +1,1416 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>Tile &amp; Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root {
+  /* Layout: wordmark bar, hero split into copy and a felt strip showing a live domino chain,
+     then a game picker (list plus rule card), a felt board for the playable game, and a glossary grid. */
+  --bg: #EDF2EE;
+  --surface: #F9FBF9;
+  --fg: #13241C;
+  --muted: #4B6056;
+  --line: #C6D3CA;
+  --link: #14634A;
+  --focus: #14634A;
+  --brass: #E2B04A;
+  --brass-ink: #1D1505;
+  --felt: #1E5A45;
+  --felt-deep: #164536;
+  --felt-line: #35826A;
+  --on-felt: #EDF5F0;
+  --on-felt-muted: #B9D5C8;
+  --tile: #F6F1E2;
+  --tile-edge: #C9BF9F;
+  --tile-line: #948B72;
+  --pip: #171C19;
+  --card: #FCFBF6;
+  --card-edge: #CDC8B8;
+  --suit-black: #171C19;
+  --suit-red: #BF3A2B;
+  --f-display: "Alfa Slab One", "Rockwell", "Roboto Slab", Georgia, serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1612; --surface: #15231C; --fg: #E3EEE8; --muted: #9DB2A7; --line: #2A4137;
+    --link: #7FD6B4; --focus: #E2B04A; --felt: #19503D; --felt-deep: #113628; --felt-line: #2B6E57;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1612; --surface: #15231C; --fg: #E3EEE8; --muted: #9DB2A7; --line: #2A4137;
+  --link: #7FD6B4; --focus: #E2B04A; --felt: #19503D; --felt-deep: #113628; --felt-line: #2B6E57;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.6;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { font: inherit; color: inherit; }
+a { color: var(--link); text-underline-offset: 3px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.felt :focus-visible { outline-color: var(--brass); }
+.wrap { max-width: 1080px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; text-wrap: balance; margin: 0; }
+h2 { font-size: clamp(1.7rem, 4.6vw, 2.5rem); line-height: 1.1; }
+h3 { font-size: clamp(1.5rem, 4vw, 1.9rem); line-height: 1.15; }
+p { margin: 0; }
+section { margin-top: 64px; }
+.lede { color: var(--muted); max-width: 60ch; margin-top: 10px; }
+.lab { font: 500 11px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.felt .lab { color: var(--on-felt-muted); }
+
+/* top bar */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px; }
+.mark { font: 400 1.35rem/1 var(--f-display); color: var(--fg); text-decoration: none; }
+.mark span { color: var(--brass); -webkit-text-stroke: .5px var(--brass-ink); }
+.top nav { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.top nav a { font-weight: 600; font-size: 15px; text-decoration: none; padding: 8px 0; }
+.top nav a:hover { text-decoration: underline; }
+
+/* buttons and chips */
+.btn { font: 600 15px/1 var(--f-body); padding: 12px 18px; min-height: 44px; border-radius: 10px; border: 2px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.btn.sm { padding: 8px 14px; min-height: 40px; font-size: 14px; }
+.btn.brass { background: var(--brass); color: var(--brass-ink); }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--fg); }
+.felt .btn.ghost { color: var(--on-felt); border-color: var(--on-felt); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.chip { font: 600 14px/1 var(--f-body); padding: 10px 14px; min-height: 40px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip.sm { padding: 8px 12px; min-height: 36px; min-width: 36px; }
+.felt .chip { background: transparent; color: var(--on-felt); border-color: var(--felt-line); }
+.felt .chip[aria-pressed="true"] { background: var(--brass); color: var(--brass-ink); border-color: var(--brass); }
+
+/* felt surface */
+.felt { background: radial-gradient(120% 100% at 50% 0%, var(--felt) 0%, var(--felt-deep) 100%); color: var(--on-felt); border-radius: 18px; box-shadow: inset 0 0 0 1px var(--felt-line); }
+
+/* hero */
+.hero { margin-top: 36px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.hero h1 { font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: 1.04; letter-spacing: -.01em; }
+.sub { margin-top: 16px; font-size: 1.1rem; max-width: 46ch; color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.strip { padding: 20px; display: grid; gap: 14px; }
+.hchain { --t: clamp(24px, 6vw, 38px); display: flex; align-items: center; gap: 3px; overflow-x: auto; padding: 14px 2px; min-height: calc(var(--t) * 2 + 28px); }
+.hchain::before, .hchain::after { content: ""; margin: auto; }
+.strip-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.strip-foot p { font-size: 14px; color: var(--on-felt-muted); max-width: 32ch; }
+
+/* dominoes */
+.tile { display: inline-flex; flex: none; position: relative; background: var(--tile); border-radius: calc(var(--t) * .18); box-shadow: 0 0 0 1px var(--tile-edge), 0 3px 0 var(--tile-edge), 0 6px 10px rgba(0, 0, 0, .28); }
+.tile.h { flex-direction: row; width: calc(var(--t) * 2); height: var(--t); }
+.tile.v { flex-direction: column; width: var(--t); height: calc(var(--t) * 2); }
+.tile::after { content: ""; position: absolute; background: var(--tile-line); }
+.tile.h::after { left: 50%; top: 18%; bottom: 18%; width: 2px; transform: translateX(-1px); }
+.tile.v::after { top: 50%; left: 18%; right: 18%; height: 2px; transform: translateY(-1px); }
+.half { width: var(--t); height: var(--t); display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: calc(var(--t) * .15); }
+.half i { display: grid; place-items: center; }
+.half i.on::before { content: ""; width: 80%; aspect-ratio: 1; border-radius: 50%; background: var(--pip); }
+button.tile { padding: 0; border: 0; cursor: pointer; }
+.tile.back { background: var(--felt-deep); box-shadow: 0 0 0 1px var(--felt-line), 0 2px 0 var(--felt-line); }
+.tile.back::after { display: none; }
+.tile.latest { outline: 2px solid var(--brass); outline-offset: 2px; }
+.tile.can { outline: 3px solid var(--brass); outline-offset: 2px; }
+.tile.dim { opacity: .5; }
+.tile.sel { transform: translateY(-10px); }
+@media (prefers-reduced-motion: no-preference) { .tile { transition: transform .15s ease, opacity .15s ease; } }
+
+/* playing cards */
+.pc { --cw: clamp(38px, 10vw, 52px); width: var(--cw); height: calc(var(--cw) * 1.4); background: var(--card); color: var(--suit-black); border-radius: 6px; box-shadow: 0 0 0 1px var(--card-edge), 0 3px 8px rgba(0, 0, 0, .25); display: grid; grid-template-rows: auto 1fr; padding: 3px 4px; font-family: var(--f-mono); font-variant-emoji: text; line-height: 1; }
+.pc.red { color: var(--suit-red); }
+.pc .r { font-weight: 700; font-size: calc(var(--cw) * .3); }
+.pc .r small { display: block; font-size: .8em; }
+.pc .s { align-self: center; justify-self: center; font-size: calc(var(--cw) * .5); }
+
+/* game picker */
+.filters { display: flex; flex-wrap: wrap; gap: 14px 32px; margin-top: 22px; }
+.fgroup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fgroup .lab { margin-right: 4px; }
+.count { margin-top: 12px; font-size: 14px; color: var(--muted); min-height: 1.6em; }
+.picker { margin-top: 12px; display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 20px; align-items: start; }
+.gamelist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.gbtn { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.gbtn b { font-weight: 700; }
+.gbtn .gmeta { font: 500 12px/1.4 var(--f-mono); color: var(--muted); }
+.gbtn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.gbtn[aria-pressed="true"] .gmeta { color: var(--bg); opacity: .8; }
+.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-width: 0; }
+.dhead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.tag { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 5px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+.blurb { margin-top: 10px; font-size: 1.05rem; max-width: 56ch; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 0; padding: 14px 0; border-block: 1px solid var(--line); }
+.facts dt { font: 500 11px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.facts dd { margin: 4px 0 0; font-weight: 600; }
+.detail h4 { font: 500 11px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 8px; }
+.steps { margin: 0; padding-left: 1.4em; max-width: 62ch; }
+.steps li { margin: 8px 0; padding-left: 4px; }
+.steps li::marker { font-family: var(--f-mono); font-weight: 700; color: var(--muted); }
+.dealbox { margin-top: 24px; padding: 18px; display: grid; gap: 14px; }
+.dealtop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.segwrap { display: inline-flex; align-items: center; gap: 10px; }
+.dealtxt { font-size: 15px; }
+.handrow { --t: clamp(30px, 8vw, 38px); display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.flipcol { display: grid; gap: 6px; justify-items: center; }
+.empty { color: var(--muted); padding: 10px 0; }
+
+/* board */
+.board { margin-top: 24px; padding: 20px; display: grid; gap: 16px; }
+.tbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.stat { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; min-width: 0; }
+.num { font: 700 14px/1.2 var(--f-mono); font-variant-numeric: tabular-nums; }
+.backs { --t: 13px; display: flex; flex-wrap: wrap; gap: 3px; }
+.ends { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font: 500 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--on-felt-muted); }
+.ends span { display: inline-flex; align-items: center; gap: 8px; }
+.ends b { display: inline-grid; place-items: center; min-width: 30px; height: 30px; border-radius: 8px; background: var(--tile); color: var(--pip); font-size: 15px; }
+.chain { --t: clamp(26px, 7vw, 36px); position: relative; display: flex; align-items: center; gap: 3px; overflow-x: auto; padding: 16px 6px; min-height: calc(var(--t) * 2 + 40px); background: rgba(0, 0, 0, .16); border-radius: 12px; }
+.chain::before, .chain::after { content: ""; margin: auto; }
+.msg { min-height: 3.3em; font-weight: 500; }
+.actions, .choice { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.hand { --t: clamp(32px, 8.6vw, 44px); display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; min-height: calc(var(--t) * 2 + 20px); padding-top: 12px; }
+
+/* online table */
+.opp { margin-top: 22px; }
+.chip:disabled { opacity: .5; cursor: not-allowed; }
+.lobby { margin-top: 24px; padding: 20px; display: grid; gap: 18px; }
+.lname { display: grid; gap: 6px; max-width: 280px; }
+.field { font: 500 16px/1.2 var(--f-body); min-height: 44px; width: 100%; min-width: 0; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--felt-line); background: rgba(0, 0, 0, .22); color: var(--on-felt); }
+.field::placeholder { color: var(--on-felt-muted); opacity: .75; }
+.field:disabled { opacity: .5; }
+.field.code { font: 700 1.25rem/1 var(--f-mono); letter-spacing: .28em; text-transform: uppercase; text-align: center; }
+.lpick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.lcard { background: rgba(0, 0, 0, .16); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.lcard h3 { font-size: 1.25rem; }
+.lcard p { color: var(--on-felt-muted); font-size: 15px; }
+.joinrow { display: flex; gap: 10px; }
+.lroom { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.bigcode { font: 700 1.9rem/1 var(--f-mono); letter-spacing: .22em; padding: 8px 8px 8px 16px; border-radius: 10px; background: var(--tile); color: var(--pip); user-select: all; }
+.lmsg { min-height: 1.6em; font-weight: 500; }
+.lhint { color: var(--on-felt-muted); font-size: 14px; }
+@media (max-width: 760px) {
+  .lpick { grid-template-columns: minmax(0, 1fr); }
+  .lobby { padding: 14px; }
+}
+
+/* glossary */
+.words { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0 36px; margin: 22px 0 0; }
+.words div { padding: 14px 0; border-top: 1px solid var(--line); min-width: 0; }
+.words dt { font: 700 14px/1.3 var(--f-mono); }
+.words dd { margin: 4px 0 0; color: var(--muted); }
+.foot { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .picker { grid-template-columns: minmax(0, 1fr); }
+  .gamelist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail { padding: 18px; }
+  .board { padding: 14px; }
+}
+</style>
+
+</head><body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="#top" aria-label="Tile and Deck, top of page">Tile <span>&amp;</span> Deck</a>
+    <nav aria-label="Sections">
+      <a href="#games">Games</a>
+      <a href="#play">Play dominoes</a>
+      <a href="#words">Table talk</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="h1" style="margin-top:36px">
+      <div>
+        <h1 id="h1">Pick up a tile. Deal a hand.</h1>
+        <p class="sub">Short rules for six domino and card games, a practice deal for each one, and a domino table where you can play the computer, or a friend online with a room code.</p>
+        <div class="cta">
+          <a class="btn brass" href="#play">Play dominoes</a>
+          <a class="btn ghost" href="#games">Choose a game</a>
+        </div>
+      </div>
+      <div class="strip felt">
+        <div class="hchain" id="heroChain" role="img" aria-label="A chain of six dominoes where every touching pair of halves matches"></div>
+        <div class="strip-foot">
+          <p>Touching halves match. A double-six set holds 28 tiles and 168 pips.</p>
+          <button class="btn ghost sm" id="reroll" type="button">New chain</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="games" aria-labelledby="games-h">
+      <h2 id="games-h">Choose a game</h2>
+      <p class="lede">Say how many people are at the table and what you are holding. The list shows what you can play.</p>
+      <div class="filters">
+        <div class="fgroup" role="group" aria-label="Number of players">
+          <span class="lab">Players</span>
+          <button class="chip" type="button" data-fp="any" aria-pressed="true">Any</button>
+          <button class="chip" type="button" data-fp="2" aria-pressed="false">2</button>
+          <button class="chip" type="button" data-fp="3" aria-pressed="false">3</button>
+          <button class="chip" type="button" data-fp="4" aria-pressed="false">4</button>
+          <button class="chip" type="button" data-fp="5" aria-pressed="false">5</button>
+          <button class="chip" type="button" data-fp="6" aria-pressed="false">6</button>
+        </div>
+        <div class="fgroup" role="group" aria-label="Kind of game">
+          <span class="lab">Kind</span>
+          <button class="chip" type="button" data-fk="all" aria-pressed="true">All</button>
+          <button class="chip" type="button" data-fk="tiles" aria-pressed="false">Tiles</button>
+          <button class="chip" type="button" data-fk="cards" aria-pressed="false">Cards</button>
+        </div>
+      </div>
+      <p class="count" id="count" role="status"></p>
+      <div class="picker">
+        <ul class="gamelist" id="gamelist"></ul>
+        <article class="detail" id="detail" aria-live="polite"></article>
+      </div>
+    </section>
+
+    <section id="play" aria-labelledby="play-h">
+      <h2 id="play-h">Play dominoes</h2>
+      <p class="lede">This is Draw Dominoes for two. Each player starts with 7 tiles. Tap a tile that matches an open end of the chain. If nothing matches, draw from the boneyard. Play the computer, or send a friend a room code and play live.</p>
+      <div class="fgroup opp" role="group" aria-label="Who to play against">
+        <span class="lab">Opponent</span>
+        <button class="chip" type="button" id="oppCpu" aria-pressed="true">Computer</button>
+        <button class="chip" type="button" id="oppFriend" aria-pressed="false">Friend online</button>
+      </div>
+      <div class="lobby felt" id="lobby" hidden>
+        <div class="lname">
+          <label class="lab" for="nick">Your name</label>
+          <input class="field" id="nick" type="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Shown to your friend">
+        </div>
+        <div class="lpick" id="lpick">
+          <div class="lcard">
+            <h3>Host a game</h3>
+            <p>Get a room code and send it to your friend.</p>
+            <button class="btn brass" type="button" id="mkRoom">Create a room</button>
+          </div>
+          <div class="lcard">
+            <h3>Join a game</h3>
+            <p>Type the code your friend sent you.</p>
+            <div class="joinrow">
+              <input class="field code" id="codeIn" type="text" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Room code" placeholder="K7M4Q">
+              <button class="btn brass" type="button" id="joinBtn">Join</button>
+            </div>
+          </div>
+        </div>
+        <div class="lroom" id="lroom" hidden>
+          <div class="stat">
+            <span class="lab">Room code</span>
+            <span class="bigcode" id="bigCode"></span>
+            <button class="btn ghost sm" type="button" id="copyCode">Copy code</button>
+            <button class="btn ghost sm" type="button" id="copyLink">Copy invite link</button>
+          </div>
+          <button class="btn ghost sm" type="button" id="leaveBtn">Leave room</button>
+        </div>
+        <p class="lmsg" id="lmsg" role="status"></p>
+        <p class="lhint">Moves go straight between your two browsers. Both of you need to be online and keep this page open.</p>
+      </div>
+      <div class="board felt" id="board">
+        <div class="tbar">
+          <div class="stat"><span class="lab" id="oppLab">Computer</span><div class="backs" id="cpuBacks" aria-hidden="true"></div><span class="num" id="cpuCount"></span></div>
+          <div class="stat"><span class="lab">Boneyard</span><span class="num" id="bone"></span></div>
+          <div class="stat"><span class="lab">Wins</span><span class="num" id="tally"></span></div>
+        </div>
+        <div class="ends"><span>&larr; Left end <b id="endL">-</b></span><span>Right end <b id="endR">-</b> &rarr;</span></div>
+        <div class="chain" id="chain" aria-label="The domino chain, scrolls sideways"></div>
+        <p class="msg" id="msg" role="status"></p>
+        <div class="choice" id="choice" hidden>
+          <span class="lab">Play it on</span>
+          <button class="btn brass sm" type="button" data-side="L" id="chL">Left end</button>
+          <button class="btn brass sm" type="button" data-side="R" id="chR">Right end</button>
+        </div>
+        <div class="actions">
+          <button class="btn brass" type="button" id="draw">Draw from boneyard</button>
+          <button class="btn ghost" type="button" id="pass">Pass</button>
+          <button class="btn ghost" type="button" id="newg">New game</button>
+        </div>
+        <div>
+          <span class="lab">Your tiles</span>
+          <div class="hand" id="hand"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="words" aria-labelledby="words-h">
+      <h2 id="words-h">Table talk</h2>
+      <p class="lede">Words you will hear once the first tile or card is down.</p>
+      <dl class="words">
+        <div><dt>Boneyard</dt><dd>The face-down tiles you draw from when you cannot play.</dd></div>
+        <div><dt>Double</dt><dd>A tile with the same number on both halves, such as 4|4. It goes across the chain.</dd></div>
+        <div><dt>Blocked</dt><dd>A round where nobody can play. The lowest pip total wins.</dd></div>
+        <div><dt>Book</dt><dd>Four cards of the same rank in Go Fish.</dd></div>
+        <div><dt>Meld</dt><dd>A set or a run laid on the table in Rummy.</dd></div>
+        <div><dt>Stock</dt><dd>The face-down pile you draw from in card games.</dd></div>
+      </dl>
+    </section>
+  </main>
+
+  <p class="foot">Rules follow the versions most families play. House rules differ from place to place, so agree on yours before the first tile.</p>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduce = false;
+  try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function rand(n) { return Math.floor(Math.random() * n); }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = rand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function fullSet() {
+    var t = [];
+    for (var a = 0; a <= 6; a++) for (var b = a; b <= 6; b++) t.push([a, b]);
+    return t;
+  }
+  function pl(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+
+  /* ---------- tiles ---------- */
+  var PIPS = { 0: [], 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+  function half(v) {
+    var h = el("div", "half");
+    for (var i = 0; i < 9; i++) h.appendChild(el("i", PIPS[v].indexOf(i) > -1 ? "on" : ""));
+    return h;
+  }
+  function tileEl(a, b, orient, tag) {
+    var t = el(tag || "div", "tile " + orient);
+    if (tag === "button") t.type = "button";
+    t.appendChild(half(a));
+    t.appendChild(half(b));
+    return t;
+  }
+
+  /* ---------- cards ---------- */
+  var RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+  var RANKNAME = { A: "ace", J: "jack", Q: "queen", K: "king" };
+  function deck() {
+    var d = [];
+    [["♠", false, "spades"], ["♥", true, "hearts"], ["♦", true, "diamonds"], ["♣", false, "clubs"]].forEach(function (s) {
+      RANKS.forEach(function (r, i) { d.push({ r: r, s: s[0] + "︎", red: s[1], sn: s[2], v: i + 1 }); });
+    });
+    return d;
+  }
+  function cardEl(c) {
+    var e = el("div", "pc" + (c.red ? " red" : ""));
+    e.setAttribute("role", "img");
+    e.setAttribute("aria-label", (RANKNAME[c.r] || c.r) + " of " + c.sn);
+    e.innerHTML = '<span class="r">' + c.r + "<small>" + c.s + '</small></span><span class="s">' + c.s + "</span>";
+    return e;
+  }
+
+  /* ---------- hero chain ---------- */
+  function heroChain() {
+    var vals = null;
+    for (var tries = 0; tries < 300 && !vals; tries++) {
+      var v = [rand(7)], seen = {}, ok = true;
+      for (var i = 0; i < 6; i++) {
+        var n = rand(7), k = Math.min(v[i], n) + "-" + Math.max(v[i], n);
+        if (seen[k]) { ok = false; break; }
+        seen[k] = 1; v.push(n);
+      }
+      if (ok) vals = v;
+    }
+    if (!vals) vals = [6, 3, 3, 5, 5, 1, 4];
+    var box = $("#heroChain");
+    box.replaceChildren();
+    for (var j = 0; j < 6; j++) box.appendChild(tileEl(vals[j], vals[j + 1], vals[j] === vals[j + 1] ? "v" : "h"));
+  }
+  $("#reroll").addEventListener("click", heroChain);
+  heroChain();
+
+  /* ---------- games ---------- */
+  var GAMES = [
+    { id: "block", kind: "tiles", name: "Block Dominoes", players: [2, 4], time: "about 15 min", level: "Easy",
+      blurb: "The classic. Match the ends of the chain and be first to play every tile.",
+      goal: "Empty your hand first. If nobody can move, the lowest pip total wins.",
+      steps: [
+        "Turn all 28 tiles face down and mix them. Each player takes 7 tiles for two players, or 5 tiles for three or four.",
+        "The player holding the highest double opens by placing it. With no doubles, the heaviest tile opens.",
+        "In turn, play one tile with a half that matches an open end of the chain. Place doubles across the chain.",
+        "No match means you pass. There is no drawing in this version.",
+        "The round ends when someone plays their last tile, or when nobody can move. A blocked round goes to the player with the fewest pips left.",
+        "The winner scores the pips left in the other hands. Many groups play to 100 points."
+      ],
+      deal: function (p) { return p === 2 ? 7 : 5; },
+      after: function (l) { return "The other " + l + " tiles stay face down and out of play."; } },
+    { id: "draw", kind: "tiles", name: "Draw Dominoes", players: [2, 4], time: "about 20 min", level: "Easy",
+      blurb: "Like Block, but you draw from a face-down pile instead of passing. This is the game on the table below.",
+      goal: "Be the first to play every tile in your hand.",
+      steps: [
+        "Mix the 28 tiles face down. Deal 7 each for two players, or 5 each for three or four. The rest form the boneyard.",
+        "The highest double opens. With no doubles, the heaviest tile opens.",
+        "Play a tile that matches either open end of the chain.",
+        "If you cannot play, draw from the boneyard until you can. If the boneyard is empty, pass.",
+        "The round ends when someone plays their last tile, or when the boneyard is empty and nobody can move. In a blocked round, the lowest pip total wins."
+      ],
+      deal: function (p) { return p === 2 ? 7 : 5; },
+      after: function (l) { return "The other " + l + " tiles form the boneyard."; } },
+    { id: "gofish", kind: "cards", name: "Go Fish", players: [2, 6], time: "about 10 min", level: "Easy",
+      blurb: "Ask for the card you need and collect sets of four.",
+      goal: "Collect the most books. A book is four cards of the same rank.",
+      steps: [
+        "Use a standard 52-card deck. Deal 7 cards each for two or three players, or 5 each for four or more. Put the rest face down as the stock.",
+        "On your turn, ask one player for a rank you already hold, such as “Do you have any sevens?”",
+        "If they have any, they hand over every card of that rank and you ask again.",
+        "If not, they say “Go fish” and you draw the top card of the stock. If you drew the rank you asked for, show it and go again. Otherwise your turn ends.",
+        "Lay down each book as soon as you hold all four cards of a rank. The game ends when all 13 books are down. The most books wins."
+      ],
+      deal: function (p) { return p <= 3 ? 7 : 5; },
+      after: function (l) { return "The other " + l + " cards form the stock."; } },
+    { id: "crazy8", kind: "cards", name: "Crazy Eights", players: [2, 7], time: "about 15 min", level: "Easy",
+      blurb: "Match the top card by suit or rank. Eights are wild.",
+      goal: "Be the first to get rid of every card in your hand.",
+      steps: [
+        "Use a standard 52-card deck. Deal 7 cards each for two players, or 5 each for three or more.",
+        "Turn one card face up to start the discard pile. The rest is the stock.",
+        "On your turn, play a card that matches the top discard in suit or rank.",
+        "An eight can be played on anything. The player names the suit that must follow.",
+        "If you cannot play, draw from the stock until you can. If the stock runs out, pass.",
+        "The first player with no cards wins the round and scores for the cards left in the other hands: 50 for an eight, 10 for a face card, 1 for an ace, and face value for the rest."
+      ],
+      deal: function (p) { return p === 2 ? 7 : 5; },
+      after: function (l) { return "One card starts the discard pile and the other " + (l - 1) + " form the stock."; } },
+    { id: "war", kind: "cards", name: "War", players: [2, 2], time: "10 to 30 min", level: "Easy",
+      blurb: "No choices, just luck. A good game for a waiting room.",
+      goal: "Win every card in the deck.",
+      steps: [
+        "Use a standard 52-card deck. Split it so each player has 26 cards, face down.",
+        "Both players flip their top card. The higher rank wins both cards. Aces are high.",
+        "The winner puts the won cards at the bottom of their pile.",
+        "If the cards match, it is war. Each player puts three cards face down, then flips one more. The higher card takes the whole pile.",
+        "The game ends when one player holds all 52 cards."
+      ],
+      flip: true },
+    { id: "rummy", kind: "cards", name: "Rummy", players: [2, 6], time: "about 25 min", level: "Medium",
+      blurb: "Draw, discard and build sets and runs.",
+      goal: "Go out first by fitting every card in your hand into melds. A meld is a set or a run.",
+      steps: [
+        "Use a standard 52-card deck. Deal 10 cards each for two players, 7 each for three or four, or 6 each for five or six.",
+        "Turn one card face up to start the discard pile. The rest is the stock.",
+        "A set is three or four cards of one rank. A run is three or more cards of one suit in order.",
+        "On your turn, draw the top card of the stock or the discard pile. You may lay down melds, then you must discard one card.",
+        "You may add cards to melds already on the table.",
+        "When a player goes out, the others lose points for the cards they still hold."
+      ],
+      deal: function (p) { return p === 2 ? 10 : (p <= 4 ? 7 : 6); },
+      after: function (l) { return "One card starts the discard pile and the other " + (l - 1) + " form the stock."; } }
+  ];
+
+  var F = { players: "any", kind: "all" };
+  var selId = GAMES[0].id;
+  var dealP = 2;
+
+  function byId(id) { for (var i = 0; i < GAMES.length; i++) if (GAMES[i].id === id) return GAMES[i]; return null; }
+  function visible() {
+    return GAMES.filter(function (g) {
+      return (F.kind === "all" || g.kind === F.kind) &&
+        (F.players === "any" || (F.players >= g.players[0] && F.players <= g.players[1]));
+    });
+  }
+  function startP(g) {
+    return (typeof F.players === "number" && F.players >= g.players[0] && F.players <= g.players[1]) ? F.players : g.players[0];
+  }
+  function rangeText(g) { return g.players[0] === g.players[1] ? String(g.players[0]) : g.players[0] + " to " + g.players[1]; }
+
+  function renderList(vis) {
+    var ul = $("#gamelist");
+    ul.replaceChildren();
+    vis.forEach(function (g) {
+      var li = el("li");
+      var b = el("button", "gbtn");
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(g.id === selId));
+      b.innerHTML = "<b>" + g.name + '</b><span class="gmeta">' + rangeText(g) + " players &middot; " + g.time + "</span>";
+      b.addEventListener("click", function () {
+        selId = g.id;
+        dealP = startP(g);
+        renderList(visible());
+        renderDetail();
+      });
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+    var c = vis.length + (vis.length === 1 ? " game" : " games") + (F.players !== "any" ? " for " + F.players + " players" : "");
+    $("#count").textContent = c;
+  }
+
+  function renderDetail() {
+    var d = $("#detail");
+    var g = byId(selId);
+    if (!g) {
+      d.innerHTML = '<p class="empty">No games match these choices. Try another player count, or set the kind to All.</p>';
+      return;
+    }
+    d.innerHTML =
+      '<div class="dhead"><span class="tag">' + (g.kind === "tiles" ? "Tiles" : "Cards") + "</span><h3>" + g.name + "</h3></div>" +
+      '<p class="blurb">' + g.blurb + "</p>" +
+      '<dl class="facts"><div><dt>Players</dt><dd>' + rangeText(g) + "</dd></div><div><dt>Time</dt><dd>" + g.time + "</dd></div><div><dt>Level</dt><dd>" + g.level + "</dd></div></dl>" +
+      "<h4>Goal</h4><p>" + g.goal + "</p>" +
+      "<h4>How to play</h4><ol class=\"steps\">" + g.steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>" +
+      '<div class="dealbox felt" id="dealbox"></div>';
+    renderDeal();
+  }
+
+  function renderDeal() {
+    var g = byId(selId), box = $("#dealbox");
+    if (!g || !box) return;
+    box.replaceChildren();
+    var top = el("div", "dealtop");
+    top.appendChild(el("span", "lab", "Try the deal"));
+    if (g.players[0] !== g.players[1]) {
+      var wrap = el("span", "segwrap");
+      wrap.appendChild(el("span", "lab", "Players"));
+      var seg = el("div", "seg");
+      seg.setAttribute("role", "group");
+      seg.setAttribute("aria-label", "Players for the practice deal");
+      for (var p = g.players[0]; p <= g.players[1]; p++) {
+        (function (p) {
+          var b = el("button", "chip sm", String(p));
+          b.type = "button";
+          b.setAttribute("aria-pressed", String(p === dealP));
+          b.addEventListener("click", function () { dealP = p; renderDeal(); });
+          seg.appendChild(b);
+        })(p);
+      }
+      wrap.appendChild(seg);
+      top.appendChild(wrap);
+    }
+    box.appendChild(top);
+
+    var txt = el("p", "dealtxt");
+    var row = el("div", "handrow");
+    var again = el("button", "btn ghost sm");
+    again.type = "button";
+    again.addEventListener("click", renderDeal);
+
+    if (g.flip) {
+      var pair = shuffle(deck()).slice(0, 2);
+      var val = function (c) { return c.v === 1 ? 14 : c.v; };
+      txt.innerHTML = "Each player gets <b>26 cards</b>, face down. Both flip the top card:";
+      pair.forEach(function (c, i) {
+        var col = el("div", "flipcol");
+        col.appendChild(cardEl(c));
+        col.appendChild(el("span", "lab", "Player " + (i + 1)));
+        row.appendChild(col);
+      });
+      var res = val(pair[0]) === val(pair[1])
+        ? "Same rank. That is war: each player puts three cards face down and flips one more."
+        : "Player " + (val(pair[0]) > val(pair[1]) ? 1 : 2) + " wins both cards.";
+      var out = el("p", "after", res);
+      again.textContent = "Flip again";
+      box.appendChild(txt); box.appendChild(row); box.appendChild(out); box.appendChild(again);
+      return;
+    }
+
+    var n = g.deal(dealP);
+    var unit = g.kind === "tiles" ? "tiles" : "cards";
+    var total = g.kind === "tiles" ? 28 : 52;
+    txt.innerHTML = "With " + dealP + " players, each gets <b>" + n + " " + unit + "</b>. Here is one hand:";
+    if (g.kind === "tiles") {
+      shuffle(fullSet()).slice(0, n).forEach(function (t) { row.appendChild(tileEl(t[0], t[1], "v")); });
+    } else {
+      shuffle(deck()).slice(0, n).forEach(function (c) { row.appendChild(cardEl(c)); });
+    }
+    var note = el("p", "after", g.after(total - n * dealP));
+    again.textContent = "Deal again";
+    box.appendChild(txt); box.appendChild(row); box.appendChild(note); box.appendChild(again);
+  }
+
+  function syncFilters() {
+    document.querySelectorAll("[data-fp]").forEach(function (b) {
+      var v = b.dataset.fp === "any" ? "any" : Number(b.dataset.fp);
+      b.setAttribute("aria-pressed", String(v === F.players));
+    });
+    document.querySelectorAll("[data-fk]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.fk === F.kind));
+    });
+    var vis = visible();
+    if (!vis.some(function (g) { return g.id === selId; })) selId = vis.length ? vis[0].id : null;
+    var g = byId(selId);
+    if (g) dealP = startP(g);
+    renderList(vis);
+    renderDetail();
+  }
+  document.querySelectorAll("[data-fp]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      F.players = b.dataset.fp === "any" ? "any" : Number(b.dataset.fp);
+      syncFilters();
+    });
+  });
+  document.querySelectorAll("[data-fk]").forEach(function (b) {
+    b.addEventListener("click", function () { F.kind = b.dataset.fk; syncFilters(); });
+  });
+  syncFilters();
+
+  /* ---------- domino table: the computer, or a friend online ---------- */
+  var MODE = "cpu";                 // "cpu", "host" or "guest"
+  var G = null, GCPU = null, timer = null, pendT = null, TALLY = { you: 0, cpu: 0 };
+  var OT = { h: 0, g: 0 };          // running score of an online room: host, guest
+  var OPP = "Friend";               // the other player's name in an online room
+
+  function L() { return G.chain[0].l; }
+  function R() { return G.chain[G.chain.length - 1].r; }
+  function canPlay(t) { return t[0] === L() || t[1] === L() || t[0] === R() || t[1] === R(); }
+  function sides(t) {
+    var s = [];
+    if (t[0] === L() || t[1] === L()) s.push("L");
+    if (t[0] === R() || t[1] === R()) s.push("R");
+    return s;
+  }
+  function pipsOf(h) { return h.reduce(function (s, t) { return s + t[0] + t[1]; }, 0); }
+  function nm(t) { return t[0] + "|" + t[1]; }
+  function weight(t) { return t[0] + t[1] + (t[0] === t[1] ? 0.5 : 0); }
+  function tkey(t) { return "" + t[0] + t[1]; }
+  function tparse(s) { return [Number(s.charAt(0)), Number(s.charAt(1))]; }
+  function findTile(hand, s) {
+    for (var i = 0; i < hand.length; i++) if (tkey(hand[i]) === s) return hand[i];
+    return null;
+  }
+  function oppS() { return MODE === "cpu" ? "The computer" : OPP; }
+  function oppM() { return MODE === "cpu" ? "the computer" : OPP; }
+  function me() { return MODE === "host" ? "h" : "g"; }
+
+  function hint() {
+    if (G.you.some(canPlay)) {
+      return L() === R() ? "Play a tile that shows " + L() + "." : "Play a tile that shows " + L() + " or " + R() + ".";
+    }
+    if (G.bone.length) return "You have no match, so draw from the boneyard.";
+    return "You have no match and the boneyard is empty, so pass.";
+  }
+
+  function place(who, t, side) {
+    var hand = G[who];
+    hand.splice(hand.indexOf(t), 1);
+    var a = t[0], b = t[1], e;
+    if (side === "R") {
+      e = R();
+      G.chain.push(a === e ? { l: a, r: b } : { l: b, r: a });
+      G.last = G.chain.length - 1;
+    } else {
+      e = L();
+      G.chain.unshift(b === e ? { l: a, r: b } : { l: b, r: a });
+      G.last = 0;
+    }
+    G.passes = 0;
+    G.sel = null;
+  }
+
+  /* One deal for every mode. "you" is this browser's hand when playing the computer,
+     and the host's hand in an online room; "cpu" is the other hand. */
+  function deal() {
+    var pool = shuffle(fullSet());
+    var mine = pool.splice(0, 7), theirs = pool.splice(0, 7);
+    var g = { you: mine, cpu: theirs, bone: pool, chain: [], turn: null, passes: 0, over: false, sel: null, last: 0, busy: false, msg: "", ev: null, res: null, opener: null, openTile: null };
+    function key(t) { return t[0] === t[1] ? 1000 + t[0] : (t[0] + t[1]) * 10 + Math.max(t[0], t[1]); }
+    var best = null, owner = null;
+    mine.forEach(function (t) { if (!best || key(t) > key(best)) { best = t; owner = "you"; } });
+    theirs.forEach(function (t) { if (!best || key(t) > key(best)) { best = t; owner = "cpu"; } });
+    g[owner].splice(g[owner].indexOf(best), 1);
+    g.chain.push({ l: best[0], r: best[1] });
+    g.opener = owner;
+    g.openTile = best;
+    g.turn = owner === "you" ? "cpu" : "you";
+    return g;
+  }
+
+  function newGameCpu() {
+    clearTimeout(timer);
+    G = deal();
+    if (G.opener === "you") {
+      G.msg = "You open with " + nm(G.openTile) + ".";
+      renderTable();
+      cpuTurn();
+    } else {
+      G.msg = "The computer opens with " + nm(G.openTile) + ". Your turn. " + hint();
+      renderTable();
+    }
+  }
+
+  function newGame() {
+    if (MODE === "cpu") newGameCpu();
+    else if (MODE === "host") newGameHost();
+    else if (MODE === "guest" && G && G.over) sendAct({ k: "new" });
+  }
+
+  function afterHuman(t) {
+    if (MODE === "host") {
+      G.ev = { k: "play", who: "h", t: tkey(t) };
+      if (!G.you.length) { endGame("you", "out"); return; }
+      G.turn = "cpu";
+      afterOnline();
+      return;
+    }
+    G.msg = "You played " + nm(t) + ".";
+    if (!G.you.length) { endGame("you", "out"); return; }
+    G.turn = "cpu";
+    renderTable();
+    cpuTurn();
+  }
+
+  function doPlay(t, side) {
+    if (MODE === "guest") { sendAct({ k: "play", t: tkey(t), s: side }); return; }
+    place("you", t, side);
+    afterHuman(t);
+  }
+
+  function onTile(t) {
+    if (!G || G.over || G.turn !== "you" || G.busy) return;
+    var s = sides(t);
+    if (!s.length) { G.msg = nm(t) + " does not match " + L() + " or " + R() + ". " + hint(); G.sel = null; renderTable(); return; }
+    if (s.length === 1 || L() === R()) {
+      doPlay(t, s.indexOf("R") > -1 ? "R" : "L");
+    } else {
+      G.sel = G.sel === t ? null : t;
+      renderTable();
+    }
+  }
+
+  function cpuTurn() {
+    G.busy = true;
+    renderTable();
+    timer = setTimeout(function () {
+      if (G.over) return;
+      var moves = G.cpu.filter(canPlay), drew = 0;
+      while (!moves.length && G.bone.length) {
+        G.cpu.push(G.bone.pop());
+        drew++;
+        moves = G.cpu.filter(canPlay);
+      }
+      if (moves.length) {
+        moves.sort(function (x, y) { return weight(y) - weight(x); });
+        var t = moves[0], s = sides(t);
+        place("cpu", t, s.indexOf("R") > -1 ? "R" : "L");
+        G.msg = (drew ? "The computer drew " + drew + " and played " : "The computer played ") + nm(t) + ".";
+        if (!G.cpu.length) { endGame("cpu", "out"); return; }
+      } else {
+        G.passes++;
+        G.msg = (drew ? "The computer drew " + drew + " and had " : "The computer had ") + "no move, so it passed.";
+        if (G.passes >= 2) { endGame(null, "blocked"); return; }
+      }
+      G.busy = false;
+      G.turn = "you";
+      G.msg += " Your turn. " + hint();
+      renderTable();
+    }, reduce ? 250 : 800);
+  }
+
+  function endGame(w, how) {
+    G.over = true; G.turn = null; G.sel = null; G.busy = false;
+    var yp = pipsOf(G.you), cp = pipsOf(G.cpu), m;
+    if (how === "blocked") w = yp < cp ? "you" : (cp < yp ? "cpu" : "tie");
+    if (MODE === "cpu") {
+      if (w === "you") TALLY.you++; else if (w === "cpu") TALLY.cpu++;
+      if (how === "out") {
+        m = w === "you"
+          ? "You played your last tile and win. The computer is left holding " + pl(cp, "pip") + "."
+          : "The computer played its last tile and wins. You are left holding " + pl(yp, "pip") + ".";
+      } else {
+        m = "Nobody can move. You hold " + pl(yp, "pip") + " and the computer holds " + pl(cp, "pip") + ", so " +
+          (w === "you" ? "you win." : (w === "cpu" ? "the computer wins." : "it is a tie."));
+      }
+      G.msg = m;
+      renderTable();
+      return;
+    }
+    /* online host: "you" is the host, "cpu" is the guest */
+    if (w === "you") OT.h++; else if (w === "cpu") OT.g++;
+    G.res = { w: w === "you" ? "h" : (w === "cpu" ? "g" : "tie"), how: how, hp: yp, gp: cp };
+    afterOnline();
+  }
+
+  function renderTable() {
+    if (!G) return;
+    var my = G.turn === "you" && !G.busy && !G.over;
+    var any = G.you.some(canPlay);
+    var oppName = MODE === "cpu" ? "Computer" : OPP;
+
+    var ch = $("#chain"), prev = ch.scrollLeft;
+    ch.replaceChildren();
+    G.chain.forEach(function (c, i) {
+      var t = tileEl(c.l, c.r, c.l === c.r ? "v" : "h");
+      t.setAttribute("role", "img");
+      t.setAttribute("aria-label", c.l + " and " + c.r);
+      if (i === G.last) t.classList.add("latest");
+      ch.appendChild(t);
+    });
+    ch.scrollLeft = prev;
+    var le = ch.children[G.last];
+    if (le) {
+      var target = Math.max(0, le.offsetLeft - (ch.clientWidth - le.offsetWidth) / 2);
+      ch.scrollTo({ left: target, behavior: reduce ? "auto" : "smooth" });
+    }
+    $("#endL").textContent = L();
+    $("#endR").textContent = R();
+
+    $("#oppLab").textContent = oppName;
+    var cb = $("#cpuBacks");
+    cb.replaceChildren();
+    G.cpu.forEach(function (t) {
+      cb.appendChild(G.over ? tileEl(t[0], t[1], "v") : el("div", "tile v back"));
+    });
+    $("#cpuCount").textContent = pl(G.cpu.length, "tile");
+    $("#bone").textContent = String(G.bone.length);
+    var tl = MODE === "cpu" ? [TALLY.you, TALLY.cpu] : (MODE === "host" ? [OT.h, OT.g] : [OT.g, OT.h]);
+    $("#tally").textContent = "You " + tl[0] + " · " + oppName + " " + tl[1];
+
+    var hand = $("#hand");
+    hand.replaceChildren();
+    G.you.forEach(function (t) {
+      var playable = canPlay(t);
+      var b = tileEl(t[0], t[1], "v", "button");
+      b.setAttribute("aria-label", "Tile " + t[0] + " and " + t[1] + (my && playable ? ", can be played" : ""));
+      if (my && playable) b.classList.add("can");
+      if (my && !playable && any) b.classList.add("dim");
+      if (G.sel === t) b.classList.add("sel");
+      b.addEventListener("click", function () { onTile(t); });
+      hand.appendChild(b);
+    });
+    if (!G.you.length) hand.appendChild(el("p", "lab", "No tiles left"));
+
+    $("#draw").disabled = !(my && !any && G.bone.length > 0);
+    $("#pass").disabled = !(my && !any && G.bone.length === 0);
+    var ng = $("#newg");
+    ng.textContent = G.over ? "Play again" : "New game";
+    ng.classList.toggle("brass", G.over);
+    ng.classList.toggle("ghost", !G.over);
+    ng.hidden = MODE !== "cpu" && !G.over;
+
+    var showChoice = my && !!G.sel;
+    $("#choice").hidden = !showChoice;
+    if (showChoice) {
+      $("#chL").textContent = "Left end (" + L() + ")";
+      $("#chR").textContent = "Right end (" + R() + ")";
+    }
+    $("#msg").textContent = G.msg + (G.busy ? (MODE === "cpu" ? " The computer is thinking." : " Sending your move.") : "");
+  }
+
+  $("#draw").addEventListener("click", function () {
+    if (!G || G.over || G.turn !== "you" || G.busy) return;
+    if (G.you.some(canPlay) || !G.bone.length) return;
+    if (MODE === "guest") { sendAct({ k: "draw" }); return; }
+    var t = G.bone.pop();
+    G.you.push(t);
+    if (MODE === "host") { G.ev = { k: "draw", who: "h", t: tkey(t) }; afterOnline(); return; }
+    G.msg = "You drew " + nm(t) + ". " + hint();
+    renderTable();
+  });
+  $("#pass").addEventListener("click", function () {
+    if (!G || G.over || G.turn !== "you" || G.busy) return;
+    if (G.you.some(canPlay) || G.bone.length) return;
+    if (MODE === "guest") { sendAct({ k: "pass" }); return; }
+    G.passes++;
+    if (MODE === "host") {
+      G.ev = { k: "pass", who: "h" };
+      if (G.passes >= 2) { endGame(null, "blocked"); return; }
+      G.turn = "cpu";
+      afterOnline();
+      return;
+    }
+    if (G.passes >= 2) { endGame(null, "blocked"); return; }
+    G.msg = "You passed.";
+    G.turn = "cpu";
+    renderTable();
+    cpuTurn();
+  });
+  $("#newg").addEventListener("click", newGame);
+  document.querySelectorAll("#choice button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      if (!G || !G.sel || G.over || G.turn !== "you" || G.busy) return;
+      doPlay(G.sel, b.dataset.side);
+    });
+  });
+
+  /* ---------- online play ----------
+     Two browsers talk straight to each other (WebRTC), introduced by the free PeerJS
+     cloud service. There is no account and no game server to run. The host's browser
+     runs the game and sends the public state after every change. The guest sends one
+     move at a time, and the host checks it before it counts. */
+  var PeerC = window.Peer || (window.peerjs && window.peerjs.Peer) || null;
+  var PEER_OK = typeof PeerC === "function";
+  var PEER_OPTS = { debug: 0 };
+  var PEER = null, CONN = null, ROLE = null, CODE = "", HOSTNAME = "", IN = false, SEAT = false, SEATID = "";
+  var TOKEN = "";
+  try { TOKEN = sessionStorage.getItem("td-id") || ""; } catch (e) {}
+  if (!TOKEN) {
+    for (var ti = 0; ti < 16; ti++) TOKEN += "abcdefghjkmnpqrstuvwxyz23456789".charAt(rand(31));
+    try { sessionStorage.setItem("td-id", TOKEN); } catch (e) {}
+  }
+  var SEQ = 0, lastV = null, lastAct = 0, ACTN = 0, seenAt = 0, beatT = null, JOINING = false, FRIEND = false;
+  var S = { seated: false, full: false, gone: false, stale: false, err: "", note: "" };
+  var CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  var CTRL = new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202f\\u2060-\\u206f\\ufeff]', 'g');
+
+  function clean(s) { return typeof s === "string" ? s.replace(CTRL, "").replace(/\s+/g, " ").trim().slice(0, 14) : ""; }
+  function newCode() { var s = ""; for (var i = 0; i < 5; i++) s += CODE_CHARS.charAt(rand(CODE_CHARS.length)); return s; }
+  function peerId(c) { return "tdk-" + c.toLowerCase(); }
+  function nickValue() { return clean($("#nick").value); }
+  function nickSave() { try { localStorage.setItem("td-name", nickValue()); } catch (e) {} }
+  try { var savedName = localStorage.getItem("td-name"); if (savedName) $("#nick").value = clean(savedName); } catch (e) {}
+  function showBoard(on) { $("#board").hidden = !on; }
+  function inviteOk() { return /^https?:$/.test(location.protocol); }
+
+  /* what the lobby panel says right now */
+  function statusText() {
+    if (!PEER_OK) return "Online play needs the internet. The connection script did not load, so check your connection and reload the page.";
+    if (S.err) return S.err;
+    if (!IN) return S.note;
+    var t;
+    if (ROLE === "host") {
+      if (SEAT) t = "Playing with " + OPP + ".";
+      else if (G) t = OPP + " left. The game picks up again when they rejoin with the code.";
+      else t = "Waiting for your friend. They open this page, choose Friend online and enter the code.";
+    } else if (S.full) {
+      t = "That room already has two players.";
+    } else if (S.gone) {
+      t = "Lost the connection to " + OPP + ". Leave the room and join again with the same code.";
+    } else if (!S.seated) {
+      t = "Joining " + OPP + "'s game…";
+    } else {
+      t = "Playing with " + OPP + ".";
+    }
+    if (S.stale) t += " The connection looks slow.";
+    return t;
+  }
+
+  function renderLobby() {
+    $("#lpick").hidden = IN;
+    $("#lroom").hidden = !IN;
+    $("#bigCode").textContent = CODE;
+    $("#copyCode").hidden = ROLE !== "host";
+    $("#copyLink").hidden = ROLE !== "host" || !inviteOk();
+    $("#mkRoom").disabled = !PEER_OK || JOINING;
+    $("#joinBtn").disabled = !PEER_OK || JOINING;
+    $("#codeIn").disabled = !PEER_OK;
+    $("#oppCpu").disabled = IN || JOINING;
+    $("#lmsg").textContent = statusText();
+  }
+
+  function toCpu() {
+    if (IN || JOINING || !FRIEND) return;
+    FRIEND = false;
+    MODE = "cpu";
+    G = GCPU;
+    $("#oppCpu").setAttribute("aria-pressed", "true");
+    $("#oppFriend").setAttribute("aria-pressed", "false");
+    $("#lobby").hidden = true;
+    showBoard(true);
+    if (!G) { newGameCpu(); return; }
+    renderTable();
+    if (G.turn === "cpu" && !G.over) cpuTurn();
+  }
+  function toFriend() {
+    if (FRIEND) return;
+    clearTimeout(timer);
+    GCPU = G;
+    FRIEND = true;
+    G = null;
+    $("#oppCpu").setAttribute("aria-pressed", "false");
+    $("#oppFriend").setAttribute("aria-pressed", "true");
+    showBoard(false);
+    $("#lobby").hidden = false;
+    renderLobby();
+  }
+
+  function failJoin(msg) {
+    JOINING = false;
+    S.err = typeof msg === "string" ? msg : "Could not connect. Check your internet and try again.";
+    renderLobby();
+  }
+
+  function enterRoom(p, role, code) {
+    JOINING = false; IN = true; PEER = p; ROLE = role; MODE = role; CODE = code;
+    S = { seated: false, full: false, gone: false, stale: false, err: "", note: "" };
+    CONN = null; SEAT = false; SEATID = ""; SEQ = 0; lastV = null; lastAct = 0; ACTN = 0; seenAt = Date.now();
+    OT = { h: 0, g: 0 }; G = null; OPP = "Friend";
+    showBoard(false);
+    clearInterval(beatT);
+    beatT = setInterval(beat, 3000);
+    p.on("disconnected", function () { if (PEER === p && !p.destroyed) { try { p.reconnect(); } catch (e) {} } });
+    p.on("error", function () { /* the introduction service hiccuped; open connections carry on */ });
+    renderLobby();
+  }
+
+  function createRoom(tries) {
+    if (!PEER_OK || JOINING || IN) return;
+    tries = tries || 0;
+    JOINING = true;
+    S.err = ""; S.note = "Creating a room…";
+    HOSTNAME = nickValue();
+    nickSave();
+    renderLobby();
+    var code = newCode(), done = false, p = null, to = null;
+    try { p = new PeerC(peerId(code), PEER_OPTS); } catch (e) { failJoin(); return; }
+    to = setTimeout(function () {
+      if (done) return;
+      done = true;
+      try { p.destroy(); } catch (e) {}
+      failJoin("Could not reach the connection service. Check your internet and try again.");
+    }, 15000);
+    p.on("open", function () {
+      if (done) return;
+      done = true; clearTimeout(to);
+      enterRoom(p, "host", code);
+      p.on("connection", onHostConn);
+    });
+    p.on("error", function (e) {
+      if (done) return;
+      done = true; clearTimeout(to);
+      try { p.destroy(); } catch (x) {}
+      if (e && e.type === "unavailable-id" && tries < 4) { JOINING = false; createRoom(tries + 1); return; }
+      failJoin();
+    });
+  }
+
+  function joinRoom() {
+    if (!PEER_OK || JOINING || IN) return;
+    var code = $("#codeIn").value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (code.length !== 5) { S.err = ""; S.note = "A room code has 5 letters and numbers."; renderLobby(); return; }
+    JOINING = true;
+    S.err = ""; S.note = "Joining " + code + "…";
+    nickSave();
+    renderLobby();
+    var done = false, p = null, to = null, conn = null;
+    try { p = new PeerC(PEER_OPTS); } catch (e) { failJoin(); return; }
+    function fail(msg) {
+      if (done) return;
+      done = true; clearTimeout(to);
+      try { p.destroy(); } catch (e) {}
+      failJoin(msg);
+    }
+    to = setTimeout(function () { fail("Could not reach " + code + ". Check the code and your internet, then try again."); }, 15000);
+    p.on("error", function (e) {
+      if (done) return;
+      fail(e && e.type === "peer-unavailable"
+        ? "Nobody is hosting " + code + ". Check the code with your friend, and make sure they created the room first."
+        : null);
+    });
+    p.on("open", function () {
+      if (done) return;
+      conn = p.connect(peerId(code), { reliable: true, serialization: "json" });
+      conn.on("data", function (m) { if (CONN === conn) onGuestData(m); });
+      conn.on("close", function () { if (CONN === conn) guestLost(); });
+      conn.on("error", function () { if (CONN === conn) guestLost(); });
+      conn.on("open", function () {
+        if (done) return;
+        done = true; clearTimeout(to);
+        enterRoom(p, "guest", code);
+        CONN = conn;
+        try { conn.send({ t: "hello", name: nickValue(), id: TOKEN }); } catch (e) {}
+      });
+    });
+  }
+
+  function leaveRoom() {
+    clearTimeout(pendT); clearInterval(beatT);
+    var p = PEER;
+    IN = false; PEER = null; CONN = null; ROLE = null; MODE = "cpu"; CODE = ""; SEAT = false; G = null;
+    S = { seated: false, full: false, gone: false, stale: false, err: "", note: "You left the room." };
+    showBoard(false);
+    renderLobby();
+    if (p) { try { p.destroy(); } catch (e) {} }
+  }
+
+  /* checks the line every few seconds and frees the seat when a friend vanishes */
+  function beat() {
+    if (!IN || !CONN || !CONN.open) return;
+    try { CONN.send({ t: "p" }); } catch (e) {}
+    var idle = Date.now() - seenAt, live = ROLE === "host" ? SEAT : S.seated;
+    S.stale = live && idle > 8000;
+    if (idle > 20000) {
+      var c = CONN;
+      if (ROLE === "host") dropGuest(); else guestLost();
+      try { c.close(); } catch (e) {}
+      return;
+    }
+    renderLobby();
+  }
+
+  /* ----- host side ----- */
+  function newGameHost() {
+    G = deal();
+    G.ev = { k: "open", who: G.opener === "you" ? "h" : "g", t: tkey(G.openTile) };
+    showBoard(true);
+    G.msg = say();
+    renderTable();
+    pub();
+  }
+
+  function afterOnline() {
+    G.msg = say();
+    renderTable();
+    pub();
+  }
+
+  function pubEv() {
+    var e = G.ev;
+    if (!e) return null;
+    var o = { k: e.k, who: e.who };
+    if (e.t && !(e.k === "draw" && e.who === "h")) o.t = e.t;   /* the host's drawn tile stays hidden */
+    return o;
+  }
+
+  function pub() {
+    if (MODE !== "host" || !IN || !G || !SEAT || !CONN || !CONN.open) return;
+    SEQ++;
+    try {
+      CONN.send({
+        t: "st",
+        st: {
+          v: SEQ,
+          name: HOSTNAME,
+          ch: G.chain.map(function (c) { return "" + c.l + c.r; }),
+          last: G.last,
+          hg: G.cpu.map(tkey),
+          nh: G.you.length,
+          nb: G.bone.length,
+          turn: G.turn === "you" ? "h" : (G.turn === "cpu" ? "g" : null),
+          over: G.over,
+          ev: pubEv(),
+          res: G.res,
+          hh: G.over ? G.you.map(tkey) : null,
+          tally: { h: OT.h, g: OT.g }
+        }
+      });
+    } catch (e) {}
+  }
+
+  function dropGuest() {
+    CONN = null; SEAT = false; S.stale = false;
+    renderLobby();
+  }
+
+  /* a friend opens a line to this room; they take the seat when they say hello */
+  function onHostConn(conn) {
+    conn.on("data", function (m) { onHostData(conn, m); });
+    conn.on("close", function () { if (CONN === conn) dropGuest(); });
+    conn.on("error", function () { if (CONN === conn) dropGuest(); });
+    conn.on("open", function () { if (!IN || ROLE !== "host") { try { conn.close(); } catch (e) {} } });
+  }
+
+  function turnAway(conn) {
+    try { conn.send({ t: "full" }); } catch (e) {}
+    setTimeout(function () { try { conn.close(); } catch (e) {} }, 400);
+  }
+
+  function onHostData(conn, m) {
+    if (!IN || ROLE !== "host" || !m || typeof m !== "object") return;
+    if (m.t === "hello") {
+      var who = typeof m.id === "string" ? m.id.slice(0, 40) : "";
+      var busy = CONN && CONN !== conn && CONN.open && Date.now() - seenAt < 8000;
+      /* a seat is held by someone who is still answering, unless this is the same person coming back */
+      if (busy && (!who || who !== SEATID)) { turnAway(conn); return; }
+      if (CONN && CONN !== conn) { var old = CONN; CONN = null; try { old.close(); } catch (e) {} }
+      CONN = conn; SEATID = who; SEAT = true; lastAct = 0; seenAt = Date.now(); S.stale = false;
+      OPP = clean(m.name) || "Your friend";
+      if (!G) newGameHost(); else { G.msg = say(); renderTable(); pub(); }
+      renderLobby();
+      return;
+    }
+    if (CONN !== conn) return;
+    seenAt = Date.now(); S.stale = false;
+    if (m.t === "act" && SEAT && m.a && typeof m.a === "object") {
+      var a = m.a;
+      if (typeof a.n === "number" && a.n > lastAct) { lastAct = a.n; guestAct(a); }
+    }
+  }
+
+  /* the guest's move, checked against the real game before it counts */
+  function guestAct(a) {
+    if (!G) return;
+    if (a.k === "new") { if (G.over) newGameHost(); else pub(); return; }
+    if (G.over || G.turn !== "cpu") { pub(); return; }
+    if (a.k === "play") {
+      var t = typeof a.t === "string" ? findTile(G.cpu, a.t) : null;
+      var side = a.s === "L" || a.s === "R" ? a.s : null;
+      if (!t || !side || sides(t).indexOf(side) < 0) { pub(); return; }
+      place("cpu", t, side);
+      G.ev = { k: "play", who: "g", t: tkey(t) };
+      if (!G.cpu.length) { endGame("cpu", "out"); return; }
+      G.turn = "you";
+    } else if (a.k === "draw") {
+      if (G.cpu.some(canPlay) || !G.bone.length) { pub(); return; }
+      var d = G.bone.pop();
+      G.cpu.push(d);
+      G.ev = { k: "draw", who: "g", t: tkey(d) };
+    } else if (a.k === "pass") {
+      if (G.cpu.some(canPlay) || G.bone.length) { pub(); return; }
+      G.passes++;
+      G.ev = { k: "pass", who: "g" };
+      if (G.passes >= 2) { endGame(null, "blocked"); return; }
+      G.turn = "you";
+    } else {
+      return;
+    }
+    afterOnline();
+  }
+
+  /* ----- guest side ----- */
+  function cnt(n, max) { n = Math.floor(Number(n)); return n >= 0 && n <= max ? n : 0; }
+  function tiles(a) {
+    var out = [];
+    if (Array.isArray(a)) a.slice(0, 28).forEach(function (s) { if (typeof s === "string" && /^[0-6]{2}$/.test(s)) out.push(tparse(s)); });
+    return out;
+  }
+  function dummies(n) { var a = []; for (var i = 0; i < n; i++) a.push([0, 0]); return a; }
+
+  /* build a game view from what the host sent; everything in it is checked first */
+  function viewFrom(st) {
+    var chain = tiles(st.ch).map(function (t) { return { l: t[0], r: t[1] }; });
+    if (!chain.length) return null;
+    var last = Math.floor(Number(st.last));
+    if (!(last >= 0 && last < chain.length)) last = 0;
+    var over = st.over === true;
+    var ev = null;
+    if (st.ev && typeof st.ev === "object" && /^(open|play|draw|pass)$/.test(String(st.ev.k)) && (st.ev.who === "h" || st.ev.who === "g")) {
+      ev = { k: st.ev.k, who: st.ev.who, t: typeof st.ev.t === "string" && /^[0-6]{2}$/.test(st.ev.t) ? st.ev.t : "" };
+    }
+    var res = null;
+    if (over && st.res && typeof st.res === "object") {
+      res = { w: st.res.w === "h" || st.res.w === "g" ? st.res.w : "tie", how: st.res.how === "blocked" ? "blocked" : "out", hp: cnt(st.res.hp, 168), gp: cnt(st.res.gp, 168) };
+    }
+    OT = { h: cnt(st.tally && st.tally.h, 999), g: cnt(st.tally && st.tally.g, 999) };
+    return {
+      you: tiles(st.hg),
+      cpu: over && Array.isArray(st.hh) ? tiles(st.hh) : dummies(cnt(st.nh, 28)),
+      bone: dummies(cnt(st.nb, 28)),
+      chain: chain, last: last,
+      turn: over ? null : (st.turn === "g" ? "you" : (st.turn === "h" ? "cpu" : null)),
+      passes: 0, over: over, sel: null, busy: false, msg: "", ev: ev, res: res
+    };
+  }
+
+  function sendAct(a) {
+    if (!IN || !G || !CONN || !CONN.open) return;
+    ACTN++;
+    a.n = ACTN;
+    G.busy = true;
+    G.sel = null;
+    renderTable();
+    clearTimeout(pendT);
+    pendT = setTimeout(function () { if (G && G.busy) { G.busy = false; renderTable(); } }, 4000);
+    try { CONN.send({ t: "act", a: a }); } catch (e) {}
+  }
+
+  function guestLost() {
+    CONN = null; S.gone = true; S.stale = false;
+    clearTimeout(pendT);
+    if (G) { G.busy = false; renderTable(); }
+    renderLobby();
+  }
+
+  function onGuestData(m) {
+    seenAt = Date.now(); S.stale = false;
+    if (!IN || ROLE !== "guest" || !m || typeof m !== "object") return;
+    if (m.t === "full") { S.full = true; S.seated = false; showBoard(false); renderLobby(); return; }
+    if (m.t !== "st" || !m.st || typeof m.st !== "object") return;
+    var st = m.st;
+    OPP = clean(st.name) || "Your friend";
+    S.seated = true; S.full = false;
+    if (st.v === lastV) { renderLobby(); return; }
+    lastV = st.v;
+    var g = viewFrom(st);
+    if (!g) return;
+    clearTimeout(pendT);
+    G = g;
+    G.msg = say();
+    showBoard(true);
+    renderTable();
+    renderLobby();
+  }
+
+  /* ----- the status line for online games, written from this player's side ----- */
+  function say() {
+    var mv = me();
+    if (G.over) {
+      var r = G.res;
+      if (!r) return "The game is over.";
+      var mp = mv === "h" ? r.hp : r.gp, tp = mv === "h" ? r.gp : r.hp;
+      if (r.how === "out") {
+        return r.w === mv
+          ? "You played your last tile and win. " + oppS() + " is left holding " + pl(tp, "pip") + "."
+          : oppS() + " played their last tile and wins. You are left holding " + pl(mp, "pip") + ".";
+      }
+      return "Nobody can move. You hold " + pl(mp, "pip") + " and " + oppM() + " holds " + pl(tp, "pip") + ", so " +
+        (r.w === mv ? "you win." : (r.w === "tie" ? "it is a tie." : oppM() + " wins."));
+    }
+    var ev = G.ev, line = "";
+    if (ev) {
+      var mine = ev.who === mv, tt = ev.t ? nm(tparse(ev.t)) : "";
+      if (ev.k === "open") line = mine ? "You open with " + tt + "." : oppS() + " opens with " + tt + ".";
+      else if (ev.k === "play") line = mine ? "You played " + tt + "." : oppS() + " played " + tt + ".";
+      else if (ev.k === "draw") line = mine ? "You drew " + tt + "." : oppS() + " drew a tile.";
+      else if (ev.k === "pass") line = mine ? "You passed." : oppS() + " passed.";
+    }
+    return (line + (G.turn === "you" ? " Your turn. " + hint() : " Waiting for " + oppM() + ".")).trim();
+  }
+
+  /* ----- lobby controls ----- */
+  function copyText(text, btn, label, fallback) {
+    function done() { btn.textContent = "Copied"; setTimeout(function () { btn.textContent = label; }, 1600); }
+    function manual() { try { fallback(); } catch (e) {} }
+    try { navigator.clipboard.writeText(text).then(done, manual); } catch (e) { manual(); }
+  }
+  function copyCode() {
+    copyText(CODE, $("#copyCode"), "Copy code", function () {
+      var rg = document.createRange(); rg.selectNodeContents($("#bigCode"));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+      $("#copyCode").textContent = "Copy the selected code";
+      setTimeout(function () { $("#copyCode").textContent = "Copy code"; }, 2600);
+    });
+  }
+  function inviteLink() { return location.href.split("#")[0] + "#join-" + CODE; }
+  function copyLink() {
+    copyText(inviteLink(), $("#copyLink"), "Copy invite link", function () { window.prompt("Copy this link", inviteLink()); });
+  }
+
+  $("#oppCpu").addEventListener("click", toCpu);
+  $("#oppFriend").addEventListener("click", toFriend);
+  $("#mkRoom").addEventListener("click", function () { createRoom(0); });
+  $("#joinBtn").addEventListener("click", joinRoom);
+  $("#codeIn").addEventListener("input", function () { this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, ""); });
+  $("#codeIn").addEventListener("keydown", function (e) { if (e.key === "Enter") joinRoom(); });
+  $("#nick").addEventListener("change", nickSave);
+  $("#leaveBtn").addEventListener("click", leaveRoom);
+  $("#copyCode").addEventListener("click", copyCode);
+  $("#copyLink").addEventListener("click", copyLink);
+  window.addEventListener("pagehide", function () { if (PEER) { try { PEER.destroy(); } catch (e) {} } });
+
+  newGameCpu();
+
+  /* an invite link looks like  page.html#join-K7M4Q  and opens straight into that room */
+  var inv = /^#join-([A-Za-z0-9]{5})$/.exec(location.hash || "");
+  if (inv) {
+    toFriend();
+    $("#codeIn").value = inv[1].toUpperCase();
+    try { $("#play").scrollIntoView(); } catch (e) {}
+    if (PEER_OK) joinRoom(); else renderLobby();
+  }
+})();
+</script>
+</body></html>
